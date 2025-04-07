@@ -1,4 +1,4 @@
-namespace MudBlazor.PWA.Models;
+namespace MauiBlazorHybrid.UI.Components.Models;
 
 public class CatalogItem
 {

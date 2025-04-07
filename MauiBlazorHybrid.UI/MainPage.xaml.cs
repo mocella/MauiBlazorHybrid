@@ -1,4 +1,4 @@
-﻿namespace MauiBlazorHybrid
+﻿namespace MauiBlazorHybrid.UI
 {
     public partial class MainPage : ContentPage
     {

@@ -2,7 +2,7 @@
 using MudBlazor;
 using MudBlazor.Services;
 
-namespace MauiBlazorHybrid
+namespace MauiBlazorHybrid.UI
 {
     public static class MauiProgram
     {
@@ -20,7 +20,7 @@ namespace MauiBlazorHybrid
             {
 
                 // SnackBar Configuration
-                // NOTE: did not find a global option to turn off the Icon, but you can do that in the individual Snackbar call :( 
+                // NOTE: did not find a global option to turn off the Icon, but you can do that in the individual Snackbar call :(
                 config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
                 config.SnackbarConfiguration.PreventDuplicates = false;
                 config.SnackbarConfiguration.NewestOnTop = true;
