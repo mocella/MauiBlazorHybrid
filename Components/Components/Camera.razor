@@ -1,0 +1,135 @@
+@inject IJSRuntime jsRuntime
+
+<MudStack Class="pa-4" Row="true">
+    <MudSelect T="MediaDevice" Label="Select Camera" @bind-Value="_selectedCamera" Dense="true">
+        @foreach (var device in _cameras)
+        {
+            <MudSelectItem Value="@device">@device.Label</MudSelectItem>
+        }
+    </MudSelect>
+    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="StartCamera">Start Camera</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Default" OnClick="StopCamera">Stop Camera</MudButton>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CapturePicture">Take Picture</MudButton>
+</MudStack>
+
+<MudPaper Class="pa-4 mt-2" Elevation="4">
+    <video id="cameraVideo" playsinline width="@VideoWidth" height="@VideoHeight"></video>
+</MudPaper>
+
+<MudPaper Class="pa-4 mt-2" Elevation="4">
+    <canvas id="pictureCanvas" width="@VideoWidth" height="@VideoHeight"></canvas>
+</MudPaper>
+
+@code {
+
+    [Parameter] public int VideoWidth { get; set; } = 640;
+
+    [Parameter] public int VideoHeight { get; set; } = 480;
+
+    private List<MediaDevice> _cameras = new();
+    private MediaDevice? _selectedCamera;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _cameras = await jsRuntime.InvokeAsync<List<MediaDevice>>("getCameras");
+            if (_cameras.Any())
+            {
+                _selectedCamera = _cameras.First();
+                StateHasChanged();
+            }
+        }
+    }
+
+    private async Task StartCamera()
+    {
+        if (_selectedCamera is not null)
+            await jsRuntime.InvokeVoidAsync("startCamera", "cameraVideo", _selectedCamera.DeviceId);
+    }
+
+    private async Task StopCamera()
+    {
+        await jsRuntime.InvokeVoidAsync("stopCamera", "cameraVideo");
+    }
+
+    private async Task CapturePicture()
+    {
+        await jsRuntime.InvokeVoidAsync("capturePicture", "cameraVideo", "pictureCanvas", VideoWidth, VideoHeight);
+    }
+
+    // File: Camera.razor.cs (or inside your @code block)
+    public class MediaDevice
+    {
+        public string DeviceId { get; set; } = string.Empty;
+        public string Label { get; set; } = string.Empty;
+
+        public override string ToString()
+        {
+            return Label;
+        }
+    }
+
+}
+
+<script>
+    let videoStream = null;
+
+    async function getCameras() {
+        // Request video access to reveal device labels
+        try {
+            await navigator.mediaDevices.getUserMedia({video: true});
+        } catch (error) {
+            console.error("Permission denied or error accessing camera:", error);
+            return [];
+        }
+        if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            const videoDevices = devices.filter(device => device.kind === 'videoinput');
+            return videoDevices.map(device => {
+                return {deviceId: device.deviceId, label: device.label || 'Camera'};
+            });
+        } else {
+            console.error("enumerateDevices not supported");
+            return [];
+        }
+    }
+
+    function startCamera(videoId, cameraId) {
+        const video = document.getElementById(videoId);
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({video: {deviceId: {exact: cameraId}}})
+                .then(stream => {
+                    videoStream = stream;
+                    video.srcObject = stream;
+                    video.play();
+                })
+                .catch(error => {
+                    console.error("Error accessing camera:", error);
+                });
+        } else {
+            console.error("getUserMedia not supported");
+        }
+    }
+
+    function stopCamera(videoId) {
+        const video = document.getElementById(videoId);
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+            videoStream = null;
+        }
+    }
+
+    function capturePicture(videoId, canvasId, width, height) {
+        const video = document.getElementById(videoId);
+        const canvas = document.getElementById(canvasId);
+        if (video && canvas) {
+            const context = canvas.getContext("2d");
+            canvas.width = width;
+            canvas.height = height;
+            context.drawImage(video, 0, 0, width, height);
+        }
+    }
+</script>

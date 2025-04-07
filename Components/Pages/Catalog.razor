@@ -1,0 +1,43 @@
+@page "/catalog"
+@using MudBlazor.PWA.Models
+
+<MudGrid Class="pa-4">
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+            <MudText Typo="Typo.h1">Catalog</MudText>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
+
+<MudDataGrid T="CatalogItem" Items="@CatalogItems" Virtualize="true" FixedHeader="true" Height="70vh">
+    <Columns>
+        <PropertyColumn Property="x => x.ItemId" Title="Id" />
+        <PropertyColumn Property="x => x.Name" />
+        <PropertyColumn Property="x => x.Dimensions" />
+        <PropertyColumn Property="x => x.Price" />
+        <PropertyColumn Property="x => x.InStockQuantity" Title="In Stock" />
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<CatalogItem> CatalogItems = new List<CatalogItem>();
+
+    protected override Task OnInitializedAsync()
+    {
+        CatalogItems = new List<CatalogItem>();
+        for (int i = 0; i < 100; i++)
+        {
+            CatalogItem item = new CatalogItem()
+            {
+                ItemId = Guid.NewGuid(),
+                Name = $"Item {i}",
+                Dimensions = $"{i} x {i} x {i}",
+                Price = i * 10.0m,
+                InStockQuantity = i * 5
+            };
+            CatalogItems.Add(item);
+        }
+
+        return Task.CompletedTask;
+    }
+}
