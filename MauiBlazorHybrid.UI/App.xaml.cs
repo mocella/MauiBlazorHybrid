@@ -1,15 +1,9 @@
-﻿namespace MauiBlazorHybrid.UI
-{
-    public partial class App : Application
-    {
-        public App()
-        {
-            InitializeComponent();
-        }
+﻿namespace MauiBlazorHybrid.UI;
 
-        protected override Window CreateWindow(IActivationState? activationState)
-        {
-            return new Window(new MainPage()) { Title = "MauiBlazorHybrid.UI" };
-        }
-    }
+public partial class App : Application
+{
+    public App() => InitializeComponent();
+
+    protected override Window CreateWindow(IActivationState? activationState) =>
+        new(new MainPage()) { Title = "MauiBlazorHybrid.UI" };
 }

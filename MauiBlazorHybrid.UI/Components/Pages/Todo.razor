@@ -1,0 +1,109 @@
+@page "/todo"
+@using CommunityToolkit.Datasync.Client
+@using MauiBlazorHybrid.UI.Components.Components
+@using MauiBlazorHybrid.UI.Models
+@using Microsoft.EntityFrameworkCore
+
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudGrid>
+    <MudItem xs="12">
+        <MudPaper Class="d-flex align-center justify-center mud-width-full py-8">
+            <MudText Typo="Typo.h1">Todo List</MudText>
+        </MudPaper>
+    </MudItem>
+    <MudItem xs="12" Class="d-flex justify-end">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OpenCreateDialog">Add Todo</MudButton>
+    </MudItem>
+</MudGrid>
+
+<MudDataGrid T="TodoItem" Items="@TodoItems" Virtualize="true" FixedHeader="true" Height="70vh"
+             RowClick="OpenEditDialog">
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="Id"/>
+        <PropertyColumn Property="x => x.Title"/>
+        <PropertyColumn Property="x => x.IsComplete"/>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    [Inject] private AppDbContext context { get; set; }
+    private readonly ConcurrentObservableCollection<TodoItem> TodoItems = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTodoItemsAsync();
+    }
+
+    private async Task LoadTodoItemsAsync()
+    {
+        try
+        {
+            await context.SynchronizeAsync();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error while refreshing items", Severity.Error);
+        }
+        try
+        {
+            List<TodoItem> items = await context.TodoItems.ToListAsync();
+            TodoItems.ReplaceAll(items);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error while refreshing local items", Severity.Error);
+        }
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var parameters = new DialogParameters { ["TodoItem"] = new TodoItem() };
+        var dialog = DialogService.Show<TodoDialog>("Create Todo", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await SaveTodoItemAsync((TodoItem)result.Data);
+        }
+    }
+
+    private async Task OpenEditDialog(DataGridRowClickEventArgs<TodoItem> args)
+    {
+        var parameters = new DialogParameters { ["TodoItem"] = args.Item };
+        var dialog = DialogService.Show<TodoDialog>("Edit Todo", parameters);
+        var result = await dialog.Result;
+
+        if (!result.Canceled)
+        {
+            await SaveTodoItemAsync((TodoItem)result.Data);
+        }
+    }
+
+    private async Task SaveTodoItemAsync(TodoItem item)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(item.Id) ||
+                item.Id == Guid.Empty.ToString())
+            {
+                item.Id = Guid.NewGuid().ToString();
+                context.TodoItems.Add(item);
+            }
+            else
+            {
+                context.TodoItems.Update(item);
+            }
+
+            await context.SaveChangesAsync();
+            await LoadTodoItemsAsync();
+            Snackbar.Add("Todo item saved successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add("Error while saving item", Severity.Error);
+        }
+    }
+
+}

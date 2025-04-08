@@ -14,6 +14,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 string connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                           ?? throw new ApplicationException("DefaultConnection is not set");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
 builder.Services.AddDatasyncServices();
 
 builder.Services.AddControllers();
@@ -21,11 +22,20 @@ builder.Services.AddControllers();
 builder.Services
     .AddEndpointsApiExplorer()
     .AddSwaggerGen(options => options.AddDatasyncControllers());
-builder.Services.AddSwaggerGen();
 
 WebApplication app = builder.Build();
 
+
+// Initialize the database
+using (IServiceScope scope = app.Services.CreateScope())
+{
+    AppDbContext context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await context.InitializeDatabaseAsync();
+}
+
 // Configure the HTTP request pipeline.
+app.UseHttpsRedirection();
+
 if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local")
 {
     app.UseSwagger();
@@ -33,10 +43,7 @@ if (app.Environment.IsDevelopment() || app.Environment.EnvironmentName == "Local
     app.UseCors("AllowLocalHost");
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

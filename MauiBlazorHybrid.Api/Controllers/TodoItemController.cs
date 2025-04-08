@@ -1,7 +1,7 @@
 using CommunityToolkit.Datasync.Server;
 using CommunityToolkit.Datasync.Server.EntityFrameworkCore;
 using MauiBlazorHybrid.Api.Models;
-using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MauiBlazorHybrid.Api.Controllers;
 

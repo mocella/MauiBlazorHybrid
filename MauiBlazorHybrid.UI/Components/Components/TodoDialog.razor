@@ -1,0 +1,21 @@
+@using MauiBlazorHybrid.UI.Models
+<MudDialog>
+    <DialogContent>
+        <MudTextField @bind-Value="TodoItem.Title" Label="Title" Required="true" />
+        <MudCheckBox @bind-Value="TodoItem.IsComplete" Label="Is Complete" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Save" Color="Color.Primary">Save</MudButton>
+        <MudButton OnClick="Cancel" Color="Color.Secondary">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public TodoItem TodoItem { get; set; }
+
+    private void Save() => MudDialog.Close(DialogResult.Ok(TodoItem));
+    private void Cancel() => MudDialog.Cancel();
+}
