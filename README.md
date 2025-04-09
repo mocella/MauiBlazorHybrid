@@ -1,5 +1,5 @@
 # Introduction 
-**MauBlazorHybrid** is a sample application with the goal of deploying to Windows Desktops. This Proof of Concept was concerned with a few key needs:
+**MauiBlazorHybrid** is a sample application with the goal of deploying to Windows Desktops. This Proof of Concept was concerned with a few key needs:
 1. Find a suitable Component Library for the application, which so far seems to be [MudBlazor](https://mudblazor.com/)
 2. Support Online/Offline scenarios which is supported via [CommunityToolkit.Datasync](https://github.com/CommunityToolkit/Datasync)
 3. Allow easy use of device peripherals like system cameras.  So far, plain old HTML5 and Javascript Interop in Blazor have done the trick.
