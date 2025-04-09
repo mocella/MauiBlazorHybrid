@@ -10,15 +10,12 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
                        OnClick="@(e => DrawerToggle())" />
         <MudText Typo="Typo.h5" Class="ml-3">DriversEdge</MudText>
-        <MudSpacer />
-        <MudIconButton Icon="@(_isDarkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode)"
-                       Color="Color.Inherit" OnClick="ThemeButtonClick" />
-        <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" />
-        <MudText>John Smith</MudText>
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Overlay="false" Elevation="1" Variant="@DrawerVariant.Mini"
                ClipMode="DrawerClipMode.Always">
         <NavMenu />
+        <MudSpacer></MudSpacer>
+        <BottomNavMenu @bind-IsDarkMode="_isDarkMode" MudThemeProvider="@_mudThemeProvider" />
     </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth="MaxWidth.Medium">
@@ -26,7 +23,6 @@
         </MudContainer>
     </MudMainContent>
 </MudLayout>
-
 
 @code {
     bool _drawerOpen = true;
@@ -53,11 +49,4 @@
         StateHasChanged();
         return Task.CompletedTask;
     }
-
-    void ThemeButtonClick(MouseEventArgs args)
-    {
-        _isDarkMode = !_isDarkMode;
-        StateHasChanged();
-    }
-
 }
